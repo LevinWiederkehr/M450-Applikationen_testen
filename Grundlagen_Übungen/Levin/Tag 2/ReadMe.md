@@ -31,7 +31,7 @@
 | T10 | 0 | 0%/Error | 0/Error | Grenzfall: Nullwert |
 | T11 | -5'000 | Error | Error | Negativer Wert |
 
-## Übung 2: Funktionale Black-Box Tests für Autovermietung
+## Übung 2:
 
 ### Die 5 wichtigsten funktionalen Black-Box Testfälle:
 
@@ -43,85 +43,44 @@
 | AV4 | Stornierung einer bestehenden Buchung | Buchung wird storniert, Bestätigungsmail versendet, evtl. Storniergebühren berechnet | Es wurden keine Storniergebühren berechnet | Fehler | Fehler im Code beim berechnen -> Vielleicht vergessen die Storniergebühren dazu zu rechnen |
 | AV5 | Preisberechnung mit verschiedenen Optionen (Versicherung, Zusatzfahrer, GPS) | Gesamtpreis wird korrekt berechnet inkl. aller gewählten Extras und Steuern | Der Gesamtpreis wurde erfolgreich und korrekt berechnet | Erfolgreich | - |
 
-## Übung 3: Bank-Software Analyse
+## Übung 3:
 
-*Hinweis: Allgemeine Analyse für typische Banking-Software-Komponenten*
-
-### Mögliche Black-Box Testfälle (Benutzersicht):
+### Black-Box Testfälle (Benutzersicht):
 
 | Test-ID | Testfall | Eingabe | Erwartete Ausgabe | Kategorie |
 |---------|----------|---------|-------------------|-----------|
-| BB1 | Konto-Login | Gültige Benutzerdaten | Erfolgreicher Login, Kontoübersicht angezeigt | Authentifizierung |
-| BB2 | Kontostand abfragen | Nach erfolgreichem Login | Aktueller Kontostand wird korrekt angezeigt | Datenabfrage |
-| BB3 | Geld überweisen | Zielhonto, Betrag, Verwendungszweck | Überweisung wird ausgeführt, Bestätigung erhalten | Transaktion |
-| BB4 | Transaktionshistorie | Zeitraum auswählen | Liste aller Transaktionen im gewählten Zeitraum | Reporting |
-| BB5 | Ungültige Überweisung | Negativer Betrag oder ungenügend Guthaben | Fehlermeldung, Transaktion wird abgelehnt | Fehlerbehandlung |
+| BB1 | Konto auswählen | Gültige Kontonummer (1-5) | Kontoinformationen werden angezeigt | Navigation |
+| BB2 | Alle Konten anzeigen | "a" eingeben | Liste aller existierenden Konten | Datenabfrage |
+| BB3 | Geld einzahlen | "e" + gültiger Betrag | Kontostand wird um Betrag erhöht | Transaktion |
+| BB4 | Geld abheben (genügend Guthaben) | "a" + Betrag ≤ Kontostand | Kontostand wird reduziert | Transaktion |
+| BB5 | Geld abheben (ungenügend Guthaben) | "a" + Betrag > Kontostand | Fehlermeldung, Kontostand unverändert | Fehlerbehandlung |
+| BB6 | Geld überweisen (gleiche Währung) | "ü" + Zielkonto + Betrag | Überweisung erfolgreich, beide Kontostände aktualisiert | Transaktion |
+| BB7 | Geld überweisen (verschiedene Währungen) | "ü" + Zielkonto + Betrag | Betrag wird umgerechnet und überwiesen | Währungskonversion |
+| BB8 | Kontostand abfragen | "k" eingeben | Aktueller Kontostand wird angezeigt | Datenabfrage |
+| BB9 | Konto löschen | "l" + "j" zur Bestätigung | Konto wird aus Liste entfernt | Account Management |
+| BB10 | Wechselkurs abfragen | "w" + "CHF USD" | Aktueller Wechselkurs wird von API abgerufen | API Integration |
+| BB11 | Neues Konto erstellen | "e" + Name + Währung | Neues Konto wird erstellt und angezeigt | Account Management |
+| BB12 | Ungültige Eingaben | Buchstaben statt Zahlen bei Beträgen | Fehlermeldung und Wiederholung der Eingabe | Input Validation |
 
-### Mögliche White-Box Testfälle (Code-Ebene):
+### White-Box Testfälle (Code-Ebene):
 
 | Method-ID | Methode/Klasse | Zu testende Logik | Testarten |
 |-----------|----------------|-------------------|-----------|
-| WB1 | `calculateBalance()` | Berechnung des aktuellen Kontostands | Unit Test, Boundary Tests |
-| WB2 | `validateTransaction()` | Überprüfung der Transaktionsvalidität | Unit Test, Exception Tests |
-| WB3 | `authenticateUser()` | Benutzer-Authentifizierung | Security Tests, Unit Tests |
-| WB4 | `processTransfer()` | Geldtransfer-Logik | Integration Tests, Unit Tests |
-| WB5 | `getTransactionHistory()` | Datenbankabfragen für Transaktionen | Integration Tests, Performance Tests |
+| WB1 | `Account.deposit()` | Betrag zum Kontostand addieren | Unit Test, Boundary Tests |
+| WB2 | `Account.withdraw()` | Abhebung mit Guthabenprüfung | Unit Test, Exception Tests |
+| WB3 | `Bank.createAccount()` | Konto erstellen und zur Liste hinzufügen | Unit Test |
+| WB4 | `Bank.getAccount()` | Konto anhand ID finden | Unit Test, Edge Cases |
+| WB5 | `Bank.deleteAccount()` | Konto aus ArrayList entfernen | Unit Test |
+| WB6 | `Counter.transferAmount()` | Geldtransfer zwischen Konten | Integration Test |
+| WB7 | `Counter.convertCurrency()` | Währungsumrechnung mit festen Raten | Unit Test, Mathematical Tests |
+| WB8 | `ExchangeRateOkhttp.getExchangeRate()` | API-Aufruf und JSON-Parsing | Integration Test, Mock Tests |
+| WB9 | `Counter.chooseAccount()` | Eingabevalidierung mit RegEx | Unit Test, Input Validation |
 
-### Code-Verbesserungsvorschläge (Best Practices):
+### Code-Verbesserungsvorschläge:
 
-#### 1. **Sicherheit:**
-- Implementierung von Passwort-Hashing (BCrypt)
-- Eingabevalidierung gegen SQL-Injection
-- Session-Management und Token-basierte Authentifizierung
-- HTTPS-Verschlüsselung für alle Übertragungen
-
-#### 2. **Code-Qualität:**
-- Konsistente Naming-Conventions
-- Ausführliche Javadoc-Dokumentation
-- Separation of Concerns (Model-View-Controller)
-- Dependency Injection für bessere Testbarkeit
-
-#### 3. **Fehlerbehandlung:**
-- Zentrale Exception-Behandlung
-- Logging-Framework (Log4J/SLF4J)
-- Graceful Error Handling mit benutzerfreundlichen Fehlermeldungen
-- Rollback-Mechanismen für fehlgeschlagene Transaktionen
-
-#### 4. **Testing:**
-- Unit Tests für alle Business-Logic-Methoden
-- Integration Tests für Datenbankoperationen
-- Mock-Objects für externe Dependencies
-- Test-Coverage-Tools zur Überwachung der Testabdeckung
-
-#### 5. **Architektur:**
-- Repository Pattern für Datenzugriff
-- Builder Pattern für komplexe Objekterstellung
-- Observer Pattern für Event-Handling
-- Configuration externalisieren (Properties-Files)
-
-#### 6. **Performance:**
-- Connection Pooling für Datenbankzugriffe
-- Caching für häufig abgerufene Daten
-- Asynchrone Verarbeitung für langwierige Operationen
-- Pagination für große Datensätze
-
-### Empfohlene Teststrategie:
-
-1. **Unit Tests:** 70% Coverage der Business-Logic
-2. **Integration Tests:** Datenbankoperationen und API-Endpunkte
-3. **Security Tests:** Authentifizierung und Autorisierung
-4. **Performance Tests:** LastTests für kritische Transaktionen
-5. **User Acceptance Tests:** End-to-End Workflows
+- **Input Validation**: Bessere Validierung für negative Beträge und Null-Werte
+- **Method Responsibility**: `Counter.java` macht zu viele verschiedene Dinge
+- **Naming**: Inkonsistente Sprache (Deutsch/Englisch gemischt)
+- **Code Duplication**: Eingabevalidierung wird mehrfach wiederholt
 
 ---
-
-## Verwendung
-
-Diese Datei kann direkt als `README.md` in Ihr Repository kopiert werden. Die Tabellen sind in Standard-Markdown-Format erstellt und sollten in allen gängigen Git-Plattformen (GitHub, GitLab, etc.) korrekt dargestellt werden.
-
-## Nächste Schritte
-
-1. README.md in Repository speichern
-2. Konkrete Testfälle implementieren
-3. Testergebnisse in den Tabellen dokumentieren
-4. Code-Verbesserungen nach Best Practices umsetzen
